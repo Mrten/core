@@ -10,5 +10,6 @@ ATTR_SAMPLE_COUNT = "sample_count"
 
 CONF_INVERT = "invert"
 CONF_MAX_SAMPLES = "max_samples"
+CONF_MIN_SAMPLES = "min_samples"
 CONF_MIN_GRADIENT = "min_gradient"
 CONF_SAMPLE_DURATION = "sample_duration"

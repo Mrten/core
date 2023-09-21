@@ -208,7 +208,7 @@ class SensorTrend(BinarySensorEntity):
             while self.samples and self.samples[0][0] < cutoff:
                 self.samples.popleft()
 
-        if len(self.samples) < self.min_samples:
+        if len(self.samples) < self._min_samples:
             return
 
         # Calculate gradient of linear trend

@@ -49,6 +49,7 @@ from .const import (
     ATTR_SAMPLE_DURATION,
     CONF_INVERT,
     CONF_MAX_SAMPLES,
+    CONF_MIN_SAMPLES,
     CONF_MIN_GRADIENT,
     CONF_SAMPLE_DURATION,
     DOMAIN,
@@ -64,6 +65,7 @@ SENSOR_SCHEMA = vol.Schema(
         vol.Optional(CONF_FRIENDLY_NAME): cv.string,
         vol.Optional(CONF_INVERT, default=False): cv.boolean,
         vol.Optional(CONF_MAX_SAMPLES, default=2): cv.positive_int,
+        vol.Optional(CONF_MIN_SAMPLES, default=2): cv.positive_int,
         vol.Optional(CONF_MIN_GRADIENT, default=0.0): vol.Coerce(float),
         vol.Optional(CONF_SAMPLE_DURATION, default=0): cv.positive_int,
     }
@@ -92,6 +94,7 @@ async def async_setup_platform(
         friendly_name = device_config.get(ATTR_FRIENDLY_NAME, device_id)
         invert = device_config[CONF_INVERT]
         max_samples = device_config[CONF_MAX_SAMPLES]
+        min_samples = device_config[CONF_MIN_SAMPLES]
         min_gradient = device_config[CONF_MIN_GRADIENT]
         sample_duration = device_config[CONF_SAMPLE_DURATION]
 
@@ -105,6 +108,7 @@ async def async_setup_platform(
                 device_class,
                 invert,
                 max_samples,
+                min_samples,
                 min_gradient,
                 sample_duration,
             )
@@ -133,6 +137,7 @@ class SensorTrend(BinarySensorEntity):
         device_class: BinarySensorDeviceClass,
         invert: bool,
         max_samples: int,
+        min_samples: int,
         min_gradient: float,
         sample_duration: int,
     ) -> None:
@@ -146,6 +151,7 @@ class SensorTrend(BinarySensorEntity):
         self._invert = invert
         self._sample_duration = sample_duration
         self._min_gradient = min_gradient
+        self._min_samples = min_samples
         self.samples: deque = deque(maxlen=max_samples)
 
     @property
@@ -202,7 +208,7 @@ class SensorTrend(BinarySensorEntity):
             while self.samples and self.samples[0][0] < cutoff:
                 self.samples.popleft()
 
-        if len(self.samples) < 2:
+        if len(self.samples) < self.min_samples:
             return
 
         # Calculate gradient of linear trend
